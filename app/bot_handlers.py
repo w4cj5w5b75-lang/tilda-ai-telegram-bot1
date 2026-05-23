@@ -4,9 +4,9 @@ from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-from app.site_capture import capture_site
-from app.ai_analyzer import analyze_site_structure
-from app.tilda_builder import TildaBuilder
+from site_capture import capture_site
+from ai_analyzer import analyze_site_structure
+from tilda_builder import TildaBuilder
 
 
 router = Router()
