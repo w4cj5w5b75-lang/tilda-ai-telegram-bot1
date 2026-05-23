@@ -4,17 +4,14 @@ import os
 import sys
 
 
-# Это нужно, если хостинг запускает файл как /app/app/main.py,
-# а не как python -m app.main
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
 
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
 
 
-from app.config import settings
-from app.bot_handlers import router
+from config import settings
+from bot_handlers import router
 from aiogram import Bot, Dispatcher
 
 
