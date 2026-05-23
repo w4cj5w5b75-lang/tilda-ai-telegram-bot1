@@ -1,18 +1,13 @@
-import base64
 import json
 import re
 
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 from app.config import settings
 
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
-
-
-def encode_image(path: str) -> str:
-    with open(path, "rb") as file:
-        return base64.b64encode(file.read()).decode("utf-8")
+client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 
 def extract_json(text: str) -> dict:
@@ -30,7 +25,7 @@ def extract_json(text: str) -> dict:
     match = re.search(r"\{.*\}", text, re.DOTALL)
 
     if not match:
-        raise ValueError("ИИ не вернул JSON")
+        raise ValueError("Gemini не вернул JSON")
 
     return json.loads(match.group(0))
 
@@ -40,7 +35,8 @@ async def analyze_site_structure(
     screenshot_path: str,
     page_text: str
 ) -> dict:
-    image_base64 = encode_image(screenshot_path)
+    with open(screenshot_path, "rb") as file:
+        image_bytes = file.read()
 
     prompt = f"""
 Ты — ИИ-аналитик структуры сайтов и специалист по Tilda.
@@ -82,25 +78,26 @@ HTML-текст страницы:
 }}
 """
 
-    response = client.responses.create(
-        model=settings.OPENAI_MODEL,
-        input=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "input_image",
-                        "image_url": f"data:image/png;base64,{image_base64}",
-                    },
+    response = client.models.generate_content(
+        model=settings.GEMINI_MODEL,
+        contents=[
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=prompt),
+                    types.Part.from_bytes(
+                        data=image_bytes,
+                        mime_type="image/png"
+                    ),
                 ],
-            }
+            )
         ],
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json"
+        ),
     )
 
-    raw = response.output_text
+    if not response.text:
+        raise ValueError("Gemini вернул пустой ответ")
 
-    return extract_json(raw)
+    return extract_json(response.text)
