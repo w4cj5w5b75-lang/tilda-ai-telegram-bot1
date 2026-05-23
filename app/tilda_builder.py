@@ -1,7 +1,7 @@
 from playwright.async_api import async_playwright
 
-from app.config import settings
-from app.tilda_blocks import TILDA_BLOCKS
+from config import settings
+from tilda_blocks import TILDA_BLOCKS
 
 
 class TildaBuilder:
