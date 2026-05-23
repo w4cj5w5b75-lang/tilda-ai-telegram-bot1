@@ -10,5 +10,6 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app
 
-CMD ["python", "-m", "app.main"]
+CMD ["python", "app/main.py"]
